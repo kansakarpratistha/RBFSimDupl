@@ -38,9 +38,11 @@ def app():
 	if 'aq_ls' and 'we_ls' and 'cf_ls' in st.session_state :
 		df_clg = pd.DataFrame(st.session_state.cf_ls, columns=['Layer ID', 'K Value (m/day)', 'D Value (m)'])
 		value_list_dfs = {}
-		aq_ls_df = pd.DataFrame(st.session_state.aq_ls, columns=['Aquifer ID', 'Thickness (m)', 'Base Flow (m\u00B2/day)', 'Porosity', 'Hydraulic Conductivity (m/day)', 'Reference Head (m)'])
+		modified_aq_ls = [[*inner[1:]] for inner in st.session_state.aq_ls]
+		aq_ls_df = pd.DataFrame(modified_aq_ls, columns=['Thickness (m)', 'Base Flow (m\u00B2/day)', 'Porosity', 'Hydraulic Conductivity (m/day)', 'Reference Head (m)'])
+
 		value_list_dfs["Aquifier Data"] = aq_ls_df
-		we_ls_df = pd.DataFrame(st.session_state.we_ls, columns=['Well ID (n)', 'Pumping Rate (m\u00B3/day)', 'X-Coordinates (m)', 'Y-Coordinates (m)'])
+		we_ls_df = pd.DataFrame(st.session_state.we_ls, columns=['Well ID', 'Pumping Rate (m\u00B3/day)', 'X-Coordinates (m)', 'Y-Coordinates (m)'])
 		value_list_dfs["Well Data"] = we_ls_df
 		plots = {} 
 		bf_dict = None #initialize variable for bank filtrate calculation results
@@ -79,7 +81,8 @@ def app():
 				if len(results_clg) == 0:
 					st.info("No Clogging Factor is Added!")
 				else:
-					cf_df = pd.DataFrame(results_clg, columns=['Layer ID', 'K Value', 'D Value'])
+					# modified_clg = [[*inner[1:]] for inner in results_clg]
+					cf_df = pd.DataFrame(results_clg, columns=['Layer ID', 'Hydraulic Condutivity of Layer (m/day)', 'Thickness of Layer (m)'])
 					value_list_dfs["Clogging Factor"] = cf_df
 					aem_model.calc_clogging(results_clg[0][1], results_clg[0][2])
 			
@@ -175,7 +178,7 @@ def app():
 									value="{} m & {} m".format(riv_0_rounded, riv_1_rounded)
 								)
 
-								bf_dict = {'Bank Filtrate Portion':f"{bf_ratio_rounded}%", 'River Capture Length':f"{riv_length_rounded}m", 'Capture Length Location on Y-Axis':f"{riv_0_rounded}m & {riv_1_rounded}m"}
+								bf_dict = {'Bank Filtrate Portion (%)':f"{bf_ratio_rounded}", 'River Capture Length (m)':f"{riv_length_rounded}", 'Capture Length Location on Y-Axis (m)':f"{riv_0_rounded} & {riv_1_rounded}"}
 					with c2:
 						st.write('')
 				
@@ -202,7 +205,7 @@ def app():
 							st.sidebar.metric(label=":blue[Average Travel Time:]", value="{} days".format(avg_tt_rounded))
 							st.sidebar.metric(label=":blue[Minimum Travel Time:]", value="{} days".format(min_tt_rounded))
 
-							tt_dict = {'Average Travel Time':f'{avg_tt_rounded} days', 'Minimum Travel Time':f'{min_tt_rounded} days'}
+							tt_dict = {'Average Travel Time (days)':f'{avg_tt_rounded}', 'Minimum Travel Time (days)':f'{min_tt_rounded}'}
 							st.markdown("---")
 
 					# ------------------------------------------------------------------------------Download Files----------------------------------------------------------------------------------------
@@ -256,11 +259,13 @@ def download_report(title, value_list_dfs, plots, bf_dict, tt_dict):
 	for key, values_df in value_list_dfs.items():
 		pdf.set_font('Arial', 'B', 12)
 		pdf.set_text_color(0, 51, 102)
-		pdf.cell(50, 5, f"Input Data: {key}", ln = 2)
+		pdf.cell(0, 5, f"Input Data: {key}", ln = 2, align="L")
 		pdf.set_text_color(0, 0, 0)
 		pdf.ln(1)
 		pdf.set_font('Arial', '', 10)
-		with pdf.table(line_height=7) as table:
+		left_margin = pdf.l_margin
+		right_margin = pdf.r_margin
+		with pdf.table(line_height=7, width=pdf.w - left_margin - right_margin, align='L') as table:
 			headers = values_df.columns.tolist()
 			rows = values_df.values.tolist()
 			header_row = table.row()
@@ -275,8 +280,7 @@ def download_report(title, value_list_dfs, plots, bf_dict, tt_dict):
 		pdf.ln(5)
 		#---formatting for displaying plot images---
 	row_count=0
-	left_margin = pdf.l_margin
-	right_margin = pdf.r_margin
+	
 	img_margin = 5
 	#---if even number of images then allow 2 images per row else allow upto 3---
 	if len(plots) == 1:
@@ -306,8 +310,8 @@ def download_report(title, value_list_dfs, plots, bf_dict, tt_dict):
 			
 		if row_count == 0 and (pdf.get_y() + img_height + 15) > pdf.h:
 			pdf.add_page(format='A4')    
-			pdf.set_margins(12, 10, 12)
-			pdf.set_x(10)
+			# pdf.set_margins(20, 10, 10)
+			# pdf.set_x(10)
 			pdf.ln(5)
 			
 			
