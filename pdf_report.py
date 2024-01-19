@@ -37,6 +37,7 @@ class PDF(FPDF):
         self.rotate(0)
         self.set_xy(original_x, original_y)
         self.set_margins(20, 10, 10)
+        self.set_auto_page_break(True, margin = 12)
 
     
     def footer(self):
