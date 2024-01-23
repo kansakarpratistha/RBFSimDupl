@@ -2,8 +2,6 @@ import streamlit as st
 import numpy as np
 import streamlit.components.v1 as components
 from PIL import Image
-import requests
-import io
 
 def app():
     st.title(":red[Help Page]")
