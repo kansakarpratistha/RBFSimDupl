@@ -2,6 +2,8 @@ import streamlit as st
 import numpy as np
 import streamlit.components.v1 as components
 from PIL import Image
+import requests
+import io
 
 def app():
     st.title(":red[Help Page]")
@@ -138,6 +140,14 @@ def app():
             
 
     with e2:
+        with open("Manual/RBFsim User Manual_03.09.2022.pdf", "rb") as pdf_file:
+            PDFbyte = pdf_file.read()
+
+        st.download_button(label="Export_Report",
+                    data=PDFbyte,
+                    file_name="test.pdf",
+                    mime='application/octet-stream')
+
         pdf_display = F'<iframe src="https://docs.google.com/document/d/e/2PACX-1vT66rJLgxpupEcVXS3Tw10CnXUihvxlJjFa-oCGaSYsoavIyYwIiRlulaV88OtloEZtnkmRlkOhIHQu/pub?embedded=true" width="700" height="1000" type="application/pdf"></iframe>'
         st.markdown(pdf_display, unsafe_allow_html=True)
         
