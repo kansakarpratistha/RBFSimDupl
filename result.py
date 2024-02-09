@@ -112,11 +112,9 @@ def app():
 						st.subheader(":blue[Wells in Flow Field:]")
 					else:
 						st.subheader(":blue[Well in Flow Field:]")
-					plot1 = plotting(0, domainsize, -20, domainsize, 100)
-					b, fig1 = plot1.plot2d(aem_model, levels=8, sharey=False, quiver=False, streams=True, figsize=(18, 12))
-					plt.savefig(f'2D_plot.png', transparent=False, facecolor='white', bbox_inches="tight")
-					plots["2D Plot"] = "./2D_plot.png"
-					st.pyplot(fig1)                        
+					plot1, plot2d_img = plot_2d(domainsize, aem_model)
+					plots["2d Plot"] = plot2d_img
+					                       
 					
 
 				with c2:
@@ -129,10 +127,8 @@ def app():
 					# Check if the checkbox is checked
 					if display_3d_plot:
 						# Assuming `aem_model` is defined somewhere in your code
-						b2, fig2 = plot1.plot3d(aem_model)
-						plt.savefig(f'3D_plot.png', transparent=False, facecolor='white', bbox_inches="tight")
-						plots["3d Plot"]="./3D_plot.png"
-						st.pyplot(fig2)
+						plot3d_img = plot_3d(domainsize, aem_model)
+						plots["3d Plot"]= plot3d_img
 
 				st.divider()
 				
@@ -150,11 +146,10 @@ def app():
 						st.sidebar.title(":red[Contribution Portion:]")
 						if st.sidebar.checkbox("Bank Filtrate Portion"):
 							st.subheader(":blue[Bank Filterate Portion:]")
-							plot = plotting(0, domainsize, -20, domainsize, 100, riv_coords)
-							b, fig = plot.plot2d(aem_model, sharey=False, traj_array=traj_array, levels=8, quiver=False, streams=True)
-							plt.savefig(f'Bank_filtrate_plot.png', transparent=False, facecolor='white', bbox_inches="tight")
-							plots["Bank Filtrate Plot"]="./Bank_filtrate_plot.png"
-							st.pyplot(fig)
+							plotbf_img = plot_contrib(domainsize, riv_coords, aem_model, traj_array)
+							
+							plots["Bank Filtrate Plot"]=plotbf_img
+							
 							bf_ratio = capture_fraction * 100
 							bf_ratio_rounded = int(bf_ratio)
 							st.sidebar.metric(label=":blue[Bank Filtrate Portion:]", value="{} %".format(bf_ratio_rounded))
@@ -184,19 +179,14 @@ def app():
 
 
 				# ----------------------------------------------------------------------------Travel Time---------------------------------------------------------------------------
-				if len(results) > 1:
-					st.error(" ** Note: ** Enter Exactly One Well to get the solution for Bank Filtrate Portion, Capture Length and Time of Travel.")
-				else:
+				if len(results) == 1:
 					st.sidebar.markdown("---")
 					st.sidebar.title(":red[Travel time:]")
 					if st.sidebar.checkbox("Travel time"):
 						
 						st.subheader(":blue[Travel time:]")
-						plot2 = plotting(0, domainsize, -20, domainsize, 100, riv_coords)
-						c, fig2 = plot2.plot2d(aem_model, tt=tt, ys=ys, traj_array=traj_array, levels=8, sharey=True, quiver=False, streams=True, figsize=(18, 12))
-						plt.savefig(f'Time_travel_plot.png', transparent=False, facecolor='white', bbox_inches="tight")
-						plots["Time Travel Plot"] = "./Time_travel_plot.png"
-						st.pyplot(fig2)
+						plottt_img = plot_travelttime(domainsize, riv_coords, aem_model, tt, ys, traj_array)
+						plots["Time Travel Plot"] = plottt_img
 
 						avg_tt_rounded = int(avgtt)
 						min_tt_rounded = int(mintt)
@@ -207,7 +197,7 @@ def app():
 						tt_dict = {'Average Travel Time\n(days)':f'{avg_tt_rounded}', 'Minimum Travel Time\n(days)':f'{min_tt_rounded}'}
 						st.markdown("---")
 
-				# ------------------------------------------------------------------------------Download Files----------------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------Download Files----------------------------------------------------------------------------------------
 				plot3 = plotting(0, domainsize, -20, domainsize, 100)
 
 				
@@ -238,7 +228,47 @@ def app():
 						download_report(report_title, value_list_dfs, plots, bf_dict, tt_dict, drawdown)
 					else:
 						download_report("RBFsim", value_list_dfs, plots, bf_dict, tt_dict, drawdown)
-				
+
+def hash_func(aem_model: model_pro.Model):
+	return st.session_state.aq_ls, st.session_state.we_ls, st.session_state.cf_ls
+	# return [aem_model.k, aem_model.H, aem_model.h0, aem_model.Qo_x, aem_model.aem_elements, aem_model.well_df, aem_model.p, aem_model.x, aem_model.y]
+
+@st.cache_data(hash_funcs={model_pro.Model: hash_func})				
+def plot_2d(domainsize, aem_model):
+	plot1 = plotting(0, domainsize, -20, domainsize, 100)
+	b, fig1 = plot1.plot2d(aem_model, levels=8, sharey=False, quiver=False, streams=True, figsize=(18, 12))
+	plt.savefig(f'2D_plot.png', transparent=False, facecolor='white', bbox_inches="tight")
+	print("\n\n\t\t!!!!==========Cache miss 2d plot===========!!!!\n\n")
+	st.pyplot(fig1) 
+	return plot1, "./2D_plot.png"
+
+@st.cache_data(hash_funcs={model_pro.Model: hash_func})		
+def plot_3d(domainsize, aem_model):
+	plot1 = plotting(0, domainsize, -20, domainsize, 100)
+	b2, fig2 = plot1.plot3d(aem_model)
+	plt.savefig(f'3D_plot.png', transparent=False, facecolor='white', bbox_inches="tight")
+	print("\n\n\t\t!!!!==========Cache miss 3d plot===========!!!!\n\n")
+	st.pyplot(fig2)
+	return "./3D_plot.png"
+
+@st.cache_data(hash_funcs={model_pro.Model: hash_func})
+def plot_contrib(domainsize, riv_coords, aem_model, traj_array):
+	plot = plotting(0, domainsize, -20, domainsize, 100, riv_coords)
+	b, fig = plot.plot2d(aem_model, sharey=False, traj_array=traj_array, levels=8, quiver=False, streams=True)
+	plt.savefig(f'Bank_filtrate_plot.png', transparent=False, facecolor='white', bbox_inches="tight")
+	st.pyplot(fig)
+	print("\n\n\t\t!!!!==========Cache miss Bank filtrate plot===========!!!!\n\n")
+	return "./Bank_filtrate_plot.png"
+
+@st.cache_data(hash_funcs={model_pro.Model: hash_func})
+def plot_travelttime(domainsize, riv_coords, aem_model, tt, ys, traj_array):
+	plot2 = plotting(0, domainsize, -20, domainsize, 100, riv_coords)
+	c, fig2 = plot2.plot2d(aem_model, tt=tt, ys=ys, traj_array=traj_array, levels=8, sharey=True, quiver=False, streams=True, figsize=(18, 12))
+	plt.savefig(f'Time_travel_plot.png', transparent=False, facecolor='white', bbox_inches="tight")
+	st.pyplot(fig2)
+	print("\n\n\t\t!!!!==========Cache miss Time travel plot===========!!!!\n\n")
+	return "./Time_travel_plot.png"
+
 
 def create_download_link(val, filename):
 	b64 = base64.b64encode(val)  # val looks like b'...'

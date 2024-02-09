@@ -53,7 +53,8 @@ def app():
             if st.button("Add Values for Aquifer"):
                 #add_data_aq(aq_id, thk_aq, baseflow, porosity, hyd_con, ref_head)   ########### Need to add st.session state out here if want to use new format
                 st.session_state.aq_ls.append([aq_id, thk_aq, Gradient, porosity, hyd_con, ref_head])
-                st.success("Values added Successfully")                
+                st.success("Values added Successfully")   
+                st.rerun()             
 #-------------------------------------------------------------Read_aq-----------------------------------------------------------------------------------------------------------------------
 #--------------------------------------------------------------Update_aq--------------------------------------------------------------------------------------------------------------------                    
         elif choice_aq == "Update Data":
@@ -126,6 +127,7 @@ def app():
                     # st.session_state.aq_ls = [sublist for sublist in st.session_state.aq_ls if sublist[0] != selected_data_aq]
                     st.session_state.aq_ls = [] #clearing list because we only have one input data of aquifier
                     st.success("Aquifer Deleted Successfully")
+                    st.rerun()
 
                 #results3_aq = view_all_data_aq()
                 with st.expander("Current Data"):
@@ -163,12 +165,8 @@ def app():
     #if input_options == "Aquifer":
         with col2 :
             st.write('')
-            if len(st.session_state.we_ls)==0 :
-                menu_well = ["New Data","Update Data", "Delete Data"]
-                choice_well = st.selectbox("Select Action (Well)", menu_well)
-            if len(st.session_state.we_ls)!=0 :
-                menu_well = ["Update Data", "New Data","Delete Data"]
-                choice_well = st.selectbox("Select Action (Well)", menu_well)
+            menu_well = ["New Data","Update Data", "Delete Data"]
+            choice_well = st.selectbox("Select Action (Well)", menu_well)
         st.divider()
 
 
@@ -308,6 +306,7 @@ def app():
             if st.button("Add Values for Clogging Factor"):
                 st.session_state.cf_ls.append([clg_id, kd, dc])
                 st.success("Colmation Layer {} Added".format(clg_id))
+                st.rerun()
 
             #st.sidebar.info("In Progress")
 
@@ -373,6 +372,7 @@ def app():
                             #delete_id_clg(selected_data_clg)
                             st.session_state.cf_ls = []
                             st.success("Layer ID is Deleted Successfully")
+                            st.rerun()
                             
                 #results_clg = view_all_data_clg()
         st.divider()
