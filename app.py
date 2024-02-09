@@ -25,7 +25,7 @@ app.add_app("Help Page",new_help.app)
 app.run()
 clear_cache_btn = st.sidebar.button("Clear Cache")
 if clear_cache_btn:
-    for key in st.session_state.keys():
-        del st.session_state[key]
+    # for key in st.session_state.keys():
+    #     del st.session_state[key]
     st.cache_data.clear()
     st.rerun()
