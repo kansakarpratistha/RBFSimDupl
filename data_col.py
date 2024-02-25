@@ -47,12 +47,10 @@ def app():
             
             if st.button("Add Values for Aquifer"):
                 #add_data_aq(aq_id, thk_aq, baseflow, porosity, hyd_con, ref_head)   ########### Need to add st.session state out here if want to use new format
-                st.session_state.aq_ls.append([aq_id, thk_aq, Gradient, porosity, hyd_con, ref_head])
+                st.session_state.aq_ls.append([aq_id, thk_aq, Gradient, porosity, hyd_con])
                 st.success("Values added Successfully")   
                 clear_plots()
                 st.rerun()             
-#-------------------------------------------------------------Read_aq-----------------------------------------------------------------------------------------------------------------------
-#--------------------------------------------------------------Update_aq--------------------------------------------------------------------------------------------------------------------                    
         elif choice_aq == "Update Data":
             if len(st.session_state.aq_ls)== 0 :
                 st.write("Enter Data, Current Data set Empty")
@@ -95,7 +93,6 @@ def app():
                         st.session_state.aq_ls=j
                         st.success("Values added Successfully")
                         clear_plots()
-                        clear_plots()
                         
                 with st.expander("Updated Data"):
                     df2_aq = pd.DataFrame(st.session_state.aq_ls, columns=['Aquifer ID', 'Thickness', 'Gradient', 'Porosity', 'Hydraulic Conductivity'])
@@ -120,8 +117,6 @@ def app():
                     # st.session_state.aq_ls = [sublist for sublist in st.session_state.aq_ls if sublist[0] != selected_data_aq]
                     st.session_state.aq_ls = [] #clearing list because we only have one input data of aquifier
                     st.success("Aquifer Deleted Successfully")
-                    clear_plots()
-                    st.rerun()
                     clear_plots()
                     st.rerun()
 
@@ -167,7 +162,6 @@ def app():
             with col1:
                 well_id = st.number_input("Well ID", 1, 10, 1)
                 pump_rate = st.number_input("Pumping / Recharge Rate in (m³/day):", -5000., 5000., 1000., 1.,help='-ve Pumping, +ve Recharge')
-
 
             with col2:
                 x_coo = st.number_input("X-Coordinate of Well (m)", 1, 199, 50)
@@ -215,7 +209,6 @@ def app():
                         st.session_state.we_ls.append([new_well_id,new_pump_rate,new_x_coo,new_y_coo])
                         st.success("Successfully Updated :: {} To :: {}".format(well_id, new_well_id))
                         clear_plots()
-                        clear_plots()
 
                 #results2 = view_all_data()
                 with st.expander("Updated Data"):
@@ -241,13 +234,10 @@ def app():
                     st.success("Well ID is Deleted Successfully")
                     clear_plots()
 
-                    clear_plots()
-
 
                 with st.expander("Current Data"):
                     df3 = pd.DataFrame(st.session_state.we_ls, columns=['Well ID', 'Pumping Rate', 'X-Coordinates', 'Y-Coordinates'])
                     st.dataframe(df3)
-
 
         st.divider()
         col1, col2 = st.columns(2)
@@ -289,8 +279,6 @@ def app():
             if st.button("Add Values for River"):
                 st.session_state.cf_ls.append([clg_id, kd, dc, ref_head])
                 st.success("Colmation Layer {} Added".format(clg_id))
-                clear_plots()
-                st.rerun()
                 clear_plots()
                 st.rerun()
 
@@ -335,7 +323,6 @@ def app():
                                 st.session_state.cf_ls=j
                                 st.success("Successfully Updated!")
                                 clear_plots()
-                                clear_plots()
                                 #st.session_state.cf_ls = [sublist for sublist in st.session_state.cf_ls if sublist != selected_result_clg]
 
 
@@ -362,8 +349,6 @@ def app():
                             #delete_id_clg(selected_data_clg)
                             st.session_state.cf_ls = []
                             st.success("Layer ID is Deleted Successfully")
-                            clear_plots()
-                            st.rerun()
                             clear_plots()
                             st.rerun()
                             
@@ -476,4 +461,3 @@ def clear_plots():
         del st.session_state['bf_plot']
     if 'tt_plot' in st.session_state.keys():
         del st.session_state['tt_plot']
-
