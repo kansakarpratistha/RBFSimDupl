@@ -22,6 +22,7 @@ from PIL import Image
 from plot import *
 from pdf_report import PDF
 from datetime import date
+import data_col
 
 domainsize = 500
 
@@ -101,11 +102,17 @@ def app():
 						st.subheader(":blue[Wells in Flow Field:]")
 					else:
 						st.subheader(":blue[Well in Flow Field:]")
+					log_plot = st.toggle('log plot', on_change=data_col.clear_plots)
 					if '2d_plot' not in st.session_state.keys():
 						# print("\n\n\t\t======== 2D PLOT NOT IN SESSION ========\n\n")
 						plot1 = plotting(0, domainsize, -20, domainsize, 100)
 						b, fig1 = plot1.plot2d(aem_model, levels=8, sharey=False, quiver=False, streams=True, figsize=(18, 12))		
+						
 						st.session_state['2d_plot'] = fig1
+						if log_plot:
+							ax = plt.gca()
+							# Set the x-scale
+							ax.set_xscale('log', base=2)
 						plt.savefig(f'2D_plot.png', transparent=False, facecolor='white', bbox_inches="tight")
 					else:
 						# print("\n\n\t\t======== 2D PLOT IN SESSION ========\n\n")
@@ -170,6 +177,10 @@ def app():
 								# print("\n\n\t\t!!!!==========BF plot not in session state===========!!!!\n\n")
 								plot = plotting(0, domainsize, -20, domainsize, 100, riv_coords)
 								b, fig = plot.plot2d(aem_model, sharey=False, traj_array=traj_array, levels=8, quiver=False, streams=True)
+								if log_plot:
+									ax = plt.gca()
+									# Set the x-scale
+									ax.set_xscale('log', base=2)
 								st.session_state['bf_plot'] = fig
 								plt.savefig(f'Bank_filtrate_plot.png', transparent=False, facecolor='white', bbox_inches="tight")
 								
@@ -218,6 +229,10 @@ def app():
 							# print("\n\n\t\t!!!!==========TT plot not in session state===========!!!!\n\n")
 							plot2 = plotting(0, domainsize, -20, domainsize, 100, riv_coords)
 							c, fig2 = plot2.plot2d(aem_model, tt=tt, ys=ys, traj_array=traj_array, levels=8, sharey=True, quiver=False, streams=True, figsize=(18, 12))
+							if log_plot:
+								ax = plt.gca()
+								# Set the x-scale
+								ax.set_xscale('log', base=2)
 							st.session_state['tt_plot'] = fig2	
 							plt.savefig(f'Time_travel_plot.png', transparent=False, facecolor='white', bbox_inches="tight")
 												
