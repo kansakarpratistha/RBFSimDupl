@@ -190,7 +190,6 @@ def app():
 
 							st.pyplot(fig)
 							plots['Bank Filtrate Plot'] = "./Bank_filtrate_plot.png"
-							plots['Bank Filtrate Plot'] = "./Bank_filtrate_plot.png"
 							bf_ratio = capture_fraction * 100
 							bf_ratio_rounded = int(bf_ratio)
 							st.sidebar.metric(label=":blue[Bank Filtrate Portion:]", value="{} %".format(bf_ratio_rounded))
@@ -220,7 +219,6 @@ def app():
 
 
 				# ----------------------------------------------------------------------------Travel Time---------------------------------------------------------------------------
-				
 				if len(results) == 1:
 					st.sidebar.markdown("---")
 					st.sidebar.title(":red[Travel time:]")
